@@ -5,64 +5,54 @@
 --- https://www.lunarvim.org/docs/beginners-guide/keybinds-overview
 --- `gl` returns the line diagnostic
 
+local function set_options()
+  lvim.colorscheme = "lunar"
+  lvim.keys.normal_mode[";"] = ":"
+  lvim.transparent_window = true
+  lvim.format_on_save.enabled = true
 
-lvim.colorscheme = "lunar"
-lvim.keys.normal_mode[";"] = ":"
-lvim.transparent_window = true
-lvim.format_on_save.enabled = true
+  local options = {
+    relativenumber = true,
+    wrap = false,
+    sidescrolloff = 999,
+    so = 999,
+    foldmethod = "marker",
+    foldmarker = "{,}",
+    foldlevelstart = 99
+  }
 
-lvim.keys.normal_mode["<ESC>h"] = false
-lvim.keys.normal_mode["<ESC>j"] = false
-lvim.keys.normal_mode["<ESC>k"] = false
-lvim.keys.normal_mode["<ESC>l"] = false
-
-lvim.keys.normal_mode["<TAB>"] = ":BufferLineCycleNext<CR>"
-
-
-lvim.keys.normal_mode["<leader>c"] = false
-lvim.keys.normal_mode["<leader>x"] = ":BufferKill<CR>"
-
-lvim.keys.normal_mode["<leader>sa"] = ":SelectAll <CR>"
-lvim.keys.normal_mode["<leader>ds"] = "vim.diagnostic.setloclist"
-
---------------------------------------------------------------------   ########### OPTIONS
-
-local options = {
-  relativenumber = true,
-  wrap = false,
-  sidescrolloff = 999,
-  so = 999,
-  foldmethod = "marker",
-  foldmarker = "{,}",
-  foldlevelstart = 99
-}
-
-for k, v in pairs(options) do
-  vim.opt[k] = v
+  for k, v in pairs(options) do
+    vim.opt[k] = v
+  end
 end
 
---------------------------------------------------------------------   ########### OPTIONS (END)
+local function set_keybinds()
+  lvim.keys.normal_mode["<ESC>h"] = false
+  lvim.keys.normal_mode["<ESC>j"] = false
+  lvim.keys.normal_mode["<ESC>k"] = false
+  lvim.keys.normal_mode["<ESC>l"] = false
 
---------------------------------------------------------------------   ########### CUSTOM COMMANDS
+  lvim.keys.normal_mode["<TAB>"] = ":BufferLineCycleNext<CR>"
 
-vim.api.nvim_create_user_command("Removeregisterednurse", ":%s/\\r//g", {})
-vim.api.nvim_create_user_command("SelectAll", ":normal ggVG", {})
-
-vim.api.nvim_create_user_command("Scratchbuffer", ":e ~/scratch.md", { desc = "open scratch file"})
-vim.api.nvim_create_user_command("Chatgptprompt", ":e ~/chatprompt.md", { desc = "open chatgpt file"})
-
---------------------------------------------------------------------   ########### CUSTOM COMMANDS (END)
+  lvim.keys.normal_mode["<leader>c"] = false
+  lvim.keys.normal_mode["<leader>x"] = ":BufferKill<CR>"
+  lvim.keys.normal_mode["<leader>sa"] = ":SelectAll <CR>"
+  lvim.keys.normal_mode["<leader>ds"] = "vim.diagnostic.setloclist"
+end
 
 
+local function set_commands()
+  vim.api.nvim_create_user_command("Removeregisterednurse", ":%s/\\r//g", {})
+  vim.api.nvim_create_user_command("SelectAll", ":normal ggVG", {})
+
+  vim.api.nvim_create_user_command("Scratchbuffer", ":e ~/scratch.md", { desc = "open scratch file" })
+  vim.api.nvim_create_user_command("Chatgptprompt", ":e ~/chatprompt.md", { desc = "open chatgpt file" })
+end
 
 
 
 local null_ls = require "null-ls"
 local augroup = vim.api.nvim_create_augroup("LspFormatting", {})
-
-
-
---------------------------------------------------------------------   ########### PLUGINS/TREESITTER
 
 lvim.builtin.treesitter.ensure_installed = {
   "lua",
@@ -77,10 +67,10 @@ lvim.plugins = {
     'wfxr/minimap.vim',
     build = "cargo install --locked code-minimap",
     -- cmd = {"Minimap", "MinimapClose", "MinimapToggle", "MinimapRefresh", "MinimapUpdateHighlight"},
-    config = function ()
-      vim.cmd ("let g:minimap_width = 10")
-      vim.cmd ("let g:minimap_auto_start = 1")
-      vim.cmd ("let g:minimap_auto_start_win_enter = 1")
+    config = function()
+      vim.cmd("let g:minimap_width = 10")
+      vim.cmd("let g:minimap_auto_start = 1")
+      vim.cmd("let g:minimap_auto_start_win_enter = 1")
     end,
   },
   "simrat39/rust-tools.nvim",
@@ -109,7 +99,8 @@ lvim.plugins = {
   "olexsmir/gopher.nvim",
   "leoluz/nvim-dap-go",
   "jdhao/whitespace.nvim",
-  { "jose-elias-alvarez/null-ls.nvim", -- works ... somehow... 
+  {
+    "jose-elias-alvarez/null-ls.nvim", -- works ... somehow...
     opts = {
       sources = {
         null_ls.builtins.formatting.gofmt,
@@ -138,44 +129,12 @@ lvim.plugins = {
       end,
     }
   },
+  "OmniSharp/omnisharp-vim",
 }
 
---------------------------------------------------------------------   ########### PLUGINS/TREESITTER (END)
 
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
+local function set_rust()
+  
 
 --------------------------------------------------------------------   ########### RUST
 
@@ -293,96 +252,96 @@ lvim.builtin.which_key.mappings["C"] = {
   f = { "<cmd>lua require'crates'.show_features_popup()<cr>", "[crates] show features" },
   D = { "<cmd>lua require'crates'.show_dependencies_popup()<cr>", "[crates] show dependencies" },
 }
-
---------------------------------------------------------------------   ########### RUST (END)
---------------------------------------------------------------------   ########### GO
-------------------------
--- Treesitter
-------------------------
-
-------------------------
--- Formatting
-------------------------
-local formatters = require "lvim.lsp.null-ls.formatters"
-formatters.setup {
-  { command = "goimports", filetypes = { "go" } },
-  { command = "gofumpt", filetypes = { "go" } },
-}
-
-lvim.format_on_save = {
-  pattern = { "*.go" },
-}
-
-------------------------
--- Dap
-------------------------
-local dap_ok, dapgo = pcall(require, "dap-go")
-if not dap_ok then
-  return
 end
 
-dapgo.setup()
 
-------------------------
--- LSP
-------------------------
-vim.list_extend(lvim.lsp.automatic_configuration.skipped_servers, { "gopls" })
+local function set_go()
+  local formatters = require "lvim.lsp.null-ls.formatters"
+  formatters.setup {
+    { command = "goimports", filetypes = { "go" } },
+    { command = "gofumpt",   filetypes = { "go" } },
+  }
 
-local lsp_manager = require "lvim.lsp.manager"
-lsp_manager.setup("golangci_lint_ls", {
-  on_init = require("lvim.lsp").common_on_init,
-  capabilities = require("lvim.lsp").common_capabilities(),
-})
+  lvim.format_on_save = {
+    pattern = { "*.go" },
+  }
 
-lsp_manager.setup("gopls", {
-  on_attach = function(client, bufnr)
-    require("lvim.lsp").common_on_attach(client, bufnr)
-    local _, _ = pcall(vim.lsp.codelens.refresh)
-    local map = function(mode, lhs, rhs, desc)
-      if desc then
-        desc = desc
+  ------------------------
+  -- Dap
+  ------------------------
+  local dap_ok, dapgo = pcall(require, "dap-go")
+  if not dap_ok then
+    return
+  end
+
+  dapgo.setup()
+
+  ------------------------
+  -- LSP
+  ------------------------
+  vim.list_extend(lvim.lsp.automatic_configuration.skipped_servers, { "gopls" })
+
+  local lsp_manager = require "lvim.lsp.manager"
+  lsp_manager.setup("golangci_lint_ls", {
+    on_init = require("lvim.lsp").common_on_init,
+    capabilities = require("lvim.lsp").common_capabilities(),
+  })
+
+  lsp_manager.setup("gopls", {
+    on_attach = function(client, bufnr)
+      require("lvim.lsp").common_on_attach(client, bufnr)
+      local _, _ = pcall(vim.lsp.codelens.refresh)
+      local map = function(mode, lhs, rhs, desc)
+        if desc then
+          desc = desc
+        end
+
+        vim.keymap.set(mode, lhs, rhs, { silent = true, desc = desc, buffer = bufnr, noremap = true })
       end
-
-      vim.keymap.set(mode, lhs, rhs, { silent = true, desc = desc, buffer = bufnr, noremap = true })
-    end
-    map("n", "<leader>Ci", "<cmd>GoInstallDeps<Cr>", "Install Go Dependencies")
-    map("n", "<leader>Ct", "<cmd>GoMod tidy<cr>", "Tidy")
-    map("n", "<leader>Ca", "<cmd>GoTestAdd<Cr>", "Add Test")
-    map("n", "<leader>CA", "<cmd>GoTestsAll<Cr>", "Add All Tests")
-    map("n", "<leader>Ce", "<cmd>GoTestsExp<Cr>", "Add Exported Tests")
-    map("n", "<leader>Cg", "<cmd>GoGenerate<Cr>", "Go Generate")
-    map("n", "<leader>Cf", "<cmd>GoGenerate %<Cr>", "Go Generate File")
-    map("n", "<leader>Cc", "<cmd>GoCmt<Cr>", "Generate Comment")
-    map("n", "<leader>DT", "<cmd>lua require('dap-go').debug_test()<cr>", "Debug Test")
-  end,
-  on_init = require("lvim.lsp").common_on_init,
-  capabilities = require("lvim.lsp").common_capabilities(),
-  settings = {
-    gopls = {
-      usePlaceholders = true,
-      gofumpt = true,
-      codelenses = {
-        generate = false,
-        gc_details = true,
-        test = true,
-        tidy = true,
+      map("n", "<leader>Ci", "<cmd>GoInstallDeps<Cr>", "Install Go Dependencies")
+      map("n", "<leader>Ct", "<cmd>GoMod tidy<cr>", "Tidy")
+      map("n", "<leader>Ca", "<cmd>GoTestAdd<Cr>", "Add Test")
+      map("n", "<leader>CA", "<cmd>GoTestsAll<Cr>", "Add All Tests")
+      map("n", "<leader>Ce", "<cmd>GoTestsExp<Cr>", "Add Exported Tests")
+      map("n", "<leader>Cg", "<cmd>GoGenerate<Cr>", "Go Generate")
+      map("n", "<leader>Cf", "<cmd>GoGenerate %<Cr>", "Go Generate File")
+      map("n", "<leader>Cc", "<cmd>GoCmt<Cr>", "Generate Comment")
+      map("n", "<leader>DT", "<cmd>lua require('dap-go').debug_test()<cr>", "Debug Test")
+    end,
+    on_init = require("lvim.lsp").common_on_init,
+    capabilities = require("lvim.lsp").common_capabilities(),
+    settings = {
+      gopls = {
+        usePlaceholders = true,
+        gofumpt = true,
+        codelenses = {
+          generate = false,
+          gc_details = true,
+          test = true,
+          tidy = true,
+        },
       },
     },
-  },
-})
+  })
 
-local status_ok, gopher = pcall(require, "gopher")
-if not status_ok then
-  return
+  local status_ok, gopher = pcall(require, "gopher")
+  if not status_ok then
+    return
+  end
+
+  gopher.setup {
+    commands = {
+      go = "go",
+      gomodifytags = "gomodifytags",
+      gotests = "gotests",
+      impl = "impl",
+      iferr = "iferr",
+    },
+  }
 end
 
-gopher.setup {
-  commands = {
-    go = "go",
-    gomodifytags = "gomodifytags",
-    gotests = "gotests",
-    impl = "impl",
-    iferr = "iferr",
-  },
-}
---------------------------------------------------------------------   ########### GO (END)
+set_commands()
+set_go()
+set_keybinds()
+set_options()
+set_rust()
